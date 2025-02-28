@@ -7,9 +7,8 @@ def est_valide(plateau, ligne, col, n):
             return False  # Même colonne ou même diagonale
     return True
 
-
-def calculer_contraintes(plateau, ligne, n):
-    """ Retourne une liste de colonnes triées par ordre croissant du nombre de cases bloquées """
+def calculer_contraintes(plateau, ligne, n, inverse=False):
+    """ Retourne une liste de colonnes triées selon l'heuristique choisie """
     contraintes = []
     for col in range(n):
         if est_valide(plateau, ligne, col, n):
@@ -21,32 +20,37 @@ def calculer_contraintes(plateau, ligne, n):
                         cases_bloquees += 1
             contraintes.append((col, cases_bloquees))
 
-    # Trier les colonnes par nombre croissant de cases bloquées
-    contraintes.sort(key=lambda x: x[1])
+    # Trier les colonnes par nombre croissant (LVD) ou décroissant (HVD) de cases bloquées
+    contraintes.sort(key=lambda x: x[1], reverse=inverse)
     return [col for col, _ in contraintes]  # Retourne la liste des colonnes triées
 
-
-def placer_reines(plateau, ligne, n):
-    """ Place les reines en suivant l'heuristique LVD """
+def placer_reines(plateau, ligne, n, inverse=False):
+    """ Place les reines en suivant l'heuristique choisie """
     if ligne == n:
-        print(plateau)  # Affiche une solution trouvée
+        # print(plateau)  # Décommentez si vous voulez voir les solutions
         return
 
-    colonnes_ordonnees = calculer_contraintes(plateau, ligne, n)  # Trier les colonnes avec LVD
+    colonnes_ordonnees = calculer_contraintes(plateau, ligne, n, inverse)  # Trier selon l'heuristique
     for col in colonnes_ordonnees:
         plateau[ligne] = col  # Placer la reine
-        placer_reines(plateau, ligne + 1, n)  # Passer à la ligne suivante
+        placer_reines(plateau, ligne + 1, n, inverse)  # Passer à la ligne suivante
         plateau[ligne] = -1  # Backtracking (annuler le choix)
 
-
 def resoudre(n):
-    """ Initialise le plateau et lance la résolution avec LVD """
+    """ Compare les temps d'exécution des deux heuristiques """
     plateau = [-1] * n
+
+    # Test avec LVD (Least Constraining Value)
     start_time = time.time()
-    placer_reines(plateau, 0, n)
+    placer_reines(plateau, 0, n, inverse=False)
     end_time = time.time()
-    print(end_time - start_time," ms")
+    print(f"Temps avec LVD (moins bloquant) pour n={n}: {end_time - start_time:.6f} s")
 
+    # Test avec HVD (Most Constraining Value)
+    start_time = time.time()
+    placer_reines(plateau, 0, n, inverse=True)
+    end_time = time.time()
+    print(f"Temps avec HVD (plus bloquant) pour n={n}: {end_time - start_time:.6f} s")
 
-# Exécuter avec l'heuristique LVD pour n = 4
-resoudre(12)
+# Exécuter la comparaison pour n = 12
+resoudre(16)
