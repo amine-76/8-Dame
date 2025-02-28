@@ -1,71 +1,52 @@
-def isValide(plateau, ligne, col, n):
+import time
+
+def est_valide(plateau, ligne, col, n):
+    """ Vérifie si une reine peut être placée en (ligne, col) """
     for i in range(ligne):
-        if plateau[i] == col:
-            return False
-        if abs(plateau[i] - col) == abs(i - ligne):
-            return False
+        if plateau[i] == col or abs(plateau[i] - col) == abs(i - ligne):
+            return False  # Même colonne ou même diagonale
     return True
 
 
-def compter_case_bloquees(plateau, ligne, col, n):
-    """
-    Calcule combien de cases seront bloquées sur la ligne suivante
-    si on place une reine en (ligne, col).
-    """
-    cases_bloquees = set()
-    prochaine_ligne = ligne + 1
+def calculer_contraintes(plateau, ligne, n):
+    """ Retourne une liste de colonnes triées par ordre croissant du nombre de cases bloquées """
+    contraintes = []
+    for col in range(n):
+        if est_valide(plateau, ligne, col, n):
+            # Compter combien de cases seront bloquées en plaçant une reine ici
+            cases_bloquees = 0
+            for i in range(ligne + 1, n):  # Vérifier les lignes suivantes
+                for j in range(n):
+                    if not est_valide(plateau[:i] + [j], i, j, n):
+                        cases_bloquees += 1
+            contraintes.append((col, cases_bloquees))
 
-    if prochaine_ligne < n:
-        cases_bloquees.add(col)  # Bloque la même colonne
-        if col - 1 >= 0:
-            cases_bloquees.add(col - 1)  # Bloque la diagonale gauche
-        if col + 1 < n:
-            cases_bloquees.add(col + 1)  # Bloque la diagonale droite
-
-    print(
-        f"Si on place une reine en ({ligne}, {col}), cases bloquées en ligne {prochaine_ligne}: {len(cases_bloquees)}")
-    return len(cases_bloquees)
+    # Trier les colonnes par nombre croissant de cases bloquées
+    contraintes.sort(key=lambda x: x[1])
+    return [col for col, _ in contraintes]  # Retourne la liste des colonnes triées
 
 
-def afficher_solution(plateau,n) :
-    solution = []
-    for i in range(n) :
-        ligne_echiquier = ['.'] * n
-        ligne_echiquier[plateau[i]] = 'Q'
-        solution.append("".join(ligne_echiquier))
-    return solution
-
-def placer_reines(plateau, ligne, n, solutions):
+def placer_reines(plateau, ligne, n):
+    """ Place les reines en suivant l'heuristique LVD """
     if ligne == n:
-        solutions.append(afficher_solution(plateau, n))
+        print(plateau)  # Affiche une solution trouvée
         return
 
-    for col in range(n):
-        compter_case_bloquees(plateau, ligne, col, n)
-
-        if isValide(plateau, ligne, col, n):
-            plateau[ligne] = col
-            placer_reines(plateau, ligne + 1, n, solutions)
-            plateau[ligne] = -1  # Backtracking
+    colonnes_ordonnees = calculer_contraintes(plateau, ligne, n)  # Trier les colonnes avec LVD
+    for col in colonnes_ordonnees:
+        plateau[ligne] = col  # Placer la reine
+        placer_reines(plateau, ligne + 1, n)  # Passer à la ligne suivante
+        plateau[ligne] = -1  # Backtracking (annuler le choix)
 
 
 def resoudre(n):
+    """ Initialise le plateau et lance la résolution avec LVD """
     plateau = [-1] * n
-    solutions =[]
-    placer_reines(plateau,0,n,solutions)
-    return solutions
-
-def afficher_all_solutions(solutions):
-    print(f"Nombre de solutions : {len(solutions)}\n")
-    for idx,solution in enumerate(solutions):
-        print(f"Solution {idx +1}:")
-        for ligne in solution:
-            print(ligne)
-        print("\n")
+    start_time = time.time()
+    placer_reines(plateau, 0, n)
+    end_time = time.time()
+    print(end_time - start_time," ms")
 
 
-
-if __name__ == "__main__":
-    n = 4
-    solutions = resoudre(n)
-    afficher_all_solutions(solutions)
+# Exécuter avec l'heuristique LVD pour n = 4
+resoudre(12)
