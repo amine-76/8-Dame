@@ -15,9 +15,6 @@ def resoudre(reines=[]):
     th3 = threading.Thread(target=thread3, args=(len(reines), reines))
     th3.start()
 
-    reines = []
-    th4 = threading.Thread(target=thread4, args=(len(reines), reines))
-    th4.start()
 
 def thread1(taille, bool, tableau):
     start_time1 = time.time()
@@ -40,12 +37,6 @@ def thread3(taille, tableau):
     printPosition(tableau)
     print("Temps d'exécution Backtracking simple : %s secondes" % (start_time2 - start_time1))
 
-def thread4(taille, tableau):
-    start_time1 = time.time()
-    backtrackPlusCasesLibres(taille, tableau)
-    start_time2 = time.time()
-    printPosition(tableau)
-    print("Temps d'exécution avec plus de cases libres : %s secondes" % (start_time2 - start_time1))
 
 def heuristique(ligne, croissant, reines):
     if len(reines) == tailleGrille:
@@ -74,28 +65,6 @@ def notation(val, ligne):
             res += 1
     return res
 
-def backtrackPlusCasesLibres(ligne, reines):
-    if len(reines) == tailleGrille:
-        return True
-    placements = {}
-
-    for i in range(tailleGrille):
-        if estValide(i, reines):
-            placements[i] = 0
-            if ligne < tailleGrille:
-                placements[i] += 1
-            if i >= ligne:
-                placements[i] += 1  # Correction ici
-
-    placementsTries = {k: v for k, v in sorted(placements.items(), key=lambda item: item[1])}
-    #print("Ligne :", ligne, "placements :", placementsTries)
-
-    for i in placementsTries:
-        reines.append(i)
-        if backtrackPlusCasesLibres(ligne + 1, reines):
-            return True
-        reines.remove(i)
-    return False
 
 def backtrack(ligne, reines):
     if len(reines) == tailleGrille:
@@ -137,4 +106,10 @@ def printPosition(reines):
     print(output)
 
 if __name__ == "__main__":
-    resoudre()
+   #for i in range(10):
+        tailleGrille = 8
+        print("Taille de la grille :", tailleGrille)
+        resoudre()
+
+
+
