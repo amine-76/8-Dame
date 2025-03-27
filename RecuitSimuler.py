@@ -167,10 +167,12 @@ def est_en_prise(reines):
 #algo qui test si une reine est en prise sur la reine de la ligne du dessus sauf la première reine
 def compter_nombre_de_prise(reines):
     nb_prise = 0
-    for i in range(1, len(reines)):
-        if reines[i] == reines[i-1] or abs(reines[i] - reines[i-1]) == 1:
-            nb_prise += 1
+    for i in range(len(reines)):
+        for j in range(i + 1, len(reines)):
+            if reines[i] == reines[j] or abs(reines[i] - reines[j]) == abs(i - j):
+                nb_prise += 1
     return nb_prise
+
         
 
 def heuristique(ligne, croissant, reines):
