@@ -3,7 +3,6 @@ import threading
 import time
 import random
 
-tailleGrille = 4  # Définition correcte
 
 def resoudre(reines=[]):
     #th1 = threading.Thread(target=thread1, args=(len(reines), True, reines))
@@ -21,9 +20,12 @@ def resoudre(reines=[]):
     #th4 = threading.Thread(target=thread4, args=(len(reines), reines))
     #th4.start()
 
+    #reines = []
+    #th5 = threading.Thread(target=thread5, args=(len(reines), reines))
+    #th5.start()
     reines = []
-    th5 = threading.Thread(target=thread5, args=(len(reines), reines))
-    th5.start()
+    th6 = threading.Thread(target=thread6,args=(len(reines),reines))
+    th6.start()
 
 
 
@@ -63,6 +65,13 @@ def thread5(taille, tableau):
     #printPosition(tableau)
     print("Temps d'exécution algo de gradiant : %s secondes" % (start_time2 - start_time1))            
 
+def thread6(taille,tableau): 
+    start_time1 = time.time()
+    recuit_simuler(tableau)
+    start_time2 = time.time()
+    print("Temps d'exécution recuit simuler : %s secondes" % (start_time2 - start_time1))
+
+
 # algo aléatoire 
 def algoPermutationAleatoire(reines):
     # pose de reine sur la diagonale
@@ -81,6 +90,7 @@ def algoPermutationAleatoire(reines):
 
 def recuit_simuler(reines =[]):
     #initialisation : placement initiale
+    print("taille grille pour recuit : ", tailleGrille)
     for i in range(tailleGrille) : 
         reines.append(i)
 
@@ -89,11 +99,11 @@ def recuit_simuler(reines =[]):
     print("Nombre de prise recuit simuler à l'initialisation : ", nb_prises)
 
     #Paramètres de recuit simuler
-    T = 1.0 #Temp initiale
-    D = 0.999 #taux de refroidissement
-    Nt = 100 #nombre d'itération par palier de température
+    T = 1.0 # Temp initiale
+    D = 0.99 # taux de refroidissement
+    Nt = 5 # nombre d'itération par palier de température
 
-    while nb_prises > 0 and T > 0.001 : 
+    while nb_prises > 0 : 
         for _ in range(Nt) : 
             # génerer un voisin aléatoire (2 permutation de deux reines)
             new_reines =  reines.copy()
@@ -108,10 +118,13 @@ def recuit_simuler(reines =[]):
                 nb_prises = new_prise
 
         T *=D #refroidissement
-    
-    print("Nombre final de conflits :", nb_prise)
+    print("Nombre final de conflits :", nb_prises)
     print("Solution trouvée :", reines)
     printPosition(reines)
+
+
+
+
 
 def algoDescenteGradient(reines):
     # Initialisation des reines sur la diagonale
@@ -230,24 +243,11 @@ def printPosition(reines):
 
 if __name__ == "__main__":
    #for i in range(10):
-        tailleGrille = 20
+        tailleGrille = 6
         print("Taille de la grille :", tailleGrille)
         resoudre()
 
 
-# Note :
-# algo fde la déscente de gradient pour trouver la solution
-# On pars de la pose de reine sur la diagonale c'est a dire un nombre de prise très importante
-# on crée une copy du tableau de reine et on permute une paire de reine  
-#algo aléa
-# notion de qualité : on prend une combianaison de reine avec la meilleur note c'est a dire le moins de prise 
-# algo de la descente de gradient : note de la qualité + permutation aléatoire
-
-
-
-# Note :
-# Eviter les permutations inutiles ? 
-# Qualt
 
 # Note :
 #public class Solution {
@@ -259,4 +259,4 @@ if __name__ == "__main__":
 # note :
 # Tinit =1.0
 # D =0.999
-# Nt = 100
+# Nt = 5

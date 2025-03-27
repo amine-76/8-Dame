@@ -79,39 +79,7 @@ def algoPermutationAleatoire(reines):
     return reines 
 
 
-def recuit_simuler(reines =[]):
-    #initialisation : placement initiale
-    for i in range(tailleGrille) : 
-        reines.append(i)
 
-    # compter le nombre de prises
-    nb_prises = compter_nombre_de_prise(reines)
-    print("Nombre de prise recuit simuler à l'initialisation : ", nb_prises)
-
-    #Paramètres de recuit simuler
-    T = 1.0 #Temp initiale
-    D = 0.999 #taux de refroidissement
-    Nt = 100 #nombre d'itération par palier de température
-
-    while nb_prises > 0 and T > 0.001 : 
-        for _ in range(Nt) : 
-            # génerer un voisin aléatoire (2 permutation de deux reines)
-            new_reines =  reines.copy()
-            i , j = random.sample(range(tailleGrille), 2)
-            new_reines[i], new_reines[j] = new_reines[j],new_reines[i]
-
-            new_prise =  compter_nombre_de_prise(new_reines)
-            delta =  new_prise-nb_prises
-            #critère d'acceptation 
-            if delta < 0 or random.random() < math.exp(-delta/T) : 
-                reines = new_reines
-                nb_prises = new_prise
-
-        T *=D #refroidissement
-    
-    print("Nombre final de conflits :", nb_prise)
-    print("Solution trouvée :", reines)
-    printPosition(reines)
 
 def algoDescenteGradient(reines):
     # Initialisation des reines sur la diagonale
