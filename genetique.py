@@ -86,6 +86,34 @@ def executer_selection():
 
     return parent1, parent2
 
+
+
+def croisssement(parent1, parent2):
+    # Étape 1 : L'enfant est une copie du parent1
+    enfant = parent1[:]
+    print("Enfant initial (copie de Parent 1) :", enfant)
+    
+    # Étape 2 : Choisir une colonne aléatoire
+    ligne_aleatoire = random.randint(0, len(parent2) - 1)
+    print("Ligne aléatoire sélectionnée :", ligne_aleatoire)
+    
+    # Étape 3 : Copier la valeur de la colonne du parent2 dans l'enfant
+    valeur_a_copier = parent2[ligne_aleatoire]
+    print("Valeur à copier depuis Parent 2 :", valeur_a_copier)
+
+    
+    if valeur_a_copier in enfant:
+        # Étape 4 : Si la valeur existe déjà, effectuer une permutation
+        index_a_permuter = enfant.index(valeur_a_copier)
+        enfant[index_a_permuter], enfant[ligne_aleatoire] = enfant[ligne_aleatoire], enfant[index_a_permuter]
+    else:
+        # Sinon, assigner directement la valeur
+        enfant[ligne_aleatoire] = valeur_a_copier
+    
+    return enfant
+
 #  Exécution de la sélection
 if __name__ == "__main__":
-    executer_selection()
+    parent1,parent2 = executer_selection()
+    enfant = croisssement(parent1,parent2)
+    print("Enfant final :", enfant)
