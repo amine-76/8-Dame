@@ -1,15 +1,17 @@
 import random
 import time
 
-# Définition de la taille de la grille
+# 📌 Paramètres
 tailleGrille = 4  
 population_size = 4
+max_generation = 50
+taux_mutation = 0.2
 
 # 📌 Initialisation aléatoire de la population (liste de permutations)
 def initialiser_population():
     return [random.sample(range(tailleGrille), tailleGrille) for _ in range(population_size)]
 
-# 📌 Fonction pour compter les conflits
+# 📌 Fonction pour compter les conflits (fitness)
 def compter_nombre_de_prise(reines):
     nb_prise = 0
     for i in range(len(reines)):
@@ -27,93 +29,97 @@ def proportion(fitness_pop):
 
 def proportion2(prop_pop):
     somme = sum(prop_pop)
-    print("Somme de la proportion normalisée :", somme)
     return [p / somme for p in prop_pop]
 
 # 📌 Sélection par roulette wheel
 def selection(tab_proba, valeur_alea, pop):
-    tableau_inverser = sorted(tab_proba, reverse=True)
-    print("Trie décroissante : ", tableau_inverser)
     somme = 0
-    index = 0
     for i, proba in enumerate(tab_proba):
         somme += proba
         if somme > valeur_alea:
-            index = i
-            break
-    print("Somme des probabilités arrêtée à :", somme)
-    print("Probabilité sélectionnée :", tab_proba[index])
-    return pop[index]
+            return pop[i]
+    return pop[-1]  # En cas de problème d'arrondi
 
-#  Fonction principale regroupant tout le processus de sélection
-def executer_selection():
-    start_time = time.time()
-    
-    #  1. Initialisation de la population
-    pop = initialiser_population()
-    print("Population initiale :", pop)
-    
-    #  2. Calcul de la fitness
-    fitness_pop = [compter_nombre_de_prise(individu) for individu in pop]
-    print("Fitness de la population :", fitness_pop)
-    
-    #  3. Normalisation
-    prop_pop = proportion(fitness_pop)
-    print("Proportion des fitness :", prop_pop)
-
-    norm_pop = normalise(prop_pop)
-    print("Population normalisée :", norm_pop)
-
-    norm_pop2 = proportion2(norm_pop)
-    print("Proportion 2 :", norm_pop2)
-
-    #  4. Sélection de deux parents
-    random_value1 = random.uniform(0, 1)
-    parent1 = selection(norm_pop2, random_value1, pop)
-
-    random_value2 = random.uniform(0, 1)
-    parent2 = selection(norm_pop2, random_value2, pop)
-
-    while parent1 == parent2:  # Assurer deux parents distincts
-        random_value2 = random.uniform(0, 1)
-        parent2 = selection(norm_pop2, random_value2, pop)
-
-    print("Parent 1 sélectionné :", parent1)
-    print("Parent 2 sélectionné :", parent2)
-    
-    end_time = time.time()
-    print(f"Temps d'exécution : {end_time - start_time:.4f} secondes")
-
-    return parent1, parent2
-
-
-
+# 📌 Croisement (crossover)
 def croisssement(parent1, parent2):
-    # Étape 1 : L'enfant est une copie du parent1
     enfant = parent1[:]
-    print("Enfant initial (copie de Parent 1) :", enfant)
-    
-    # Étape 2 : Choisir une colonne aléatoire
     ligne_aleatoire = random.randint(0, len(parent2) - 1)
-    print("Ligne aléatoire sélectionnée :", ligne_aleatoire)
-    
-    # Étape 3 : Copier la valeur de la colonne du parent2 dans l'enfant
     valeur_a_copier = parent2[ligne_aleatoire]
-    print("Valeur à copier depuis Parent 2 :", valeur_a_copier)
 
-    
     if valeur_a_copier in enfant:
-        # Étape 4 : Si la valeur existe déjà, effectuer une permutation
         index_a_permuter = enfant.index(valeur_a_copier)
         enfant[index_a_permuter], enfant[ligne_aleatoire] = enfant[ligne_aleatoire], enfant[index_a_permuter]
     else:
-        # Sinon, assigner directement la valeur
         enfant[ligne_aleatoire] = valeur_a_copier
-    
+
     return enfant
 
-#  Exécution de la sélection
+# 📌 Mutation simple : échange de deux positions
+def mutation(individu, taux_mutation=taux_mutation):
+    if random.random() < taux_mutation:
+        i, j = random.sample(range(len(individu)), 2)
+        individu[i], individu[j] = individu[j], individu[i]
+    return individu
+
+# 📌 Affichage du plateau d'échecs
+def printPosition(reines):
+    grille = [['_' for _ in range(tailleGrille)] for _ in range(tailleGrille)]
+    for i in range(tailleGrille):
+        grille[i][reines[i]] = '👸'
+    for ligne in grille:
+        print(" ".join(ligne))
+    print("\n")
+
+# 📌 Algorithme génétique complet
+def algo_genetique():
+    population = initialiser_population()
+
+    for generation in range(max_generation):
+        fitness_pop = [compter_nombre_de_prise(ind) for ind in population]
+
+        # ✅ Si une solution est trouvée
+        if 0 in fitness_pop:
+            index_solution = fitness_pop.index(0)
+            print(f"✅ Solution trouvée à la génération {generation} :")
+            printPosition(population[index_solution])
+            return population[index_solution]
+
+        # 🔁 Générer nouvelle population
+        prop = proportion(fitness_pop)
+        norm = normalise(prop)
+        norm2 = proportion2(norm)
+
+        nouvelle_population = []
+
+        while len(nouvelle_population) < population_size:
+            rand1 = random.uniform(0, 1)
+            rand2 = random.uniform(0, 1)
+
+            parent1 = selection(norm2, rand1, population)
+            parent2 = selection(norm2, rand2, population)
+
+            while parent1 == parent2:
+                rand2 = random.uniform(0, 1)
+                parent2 = selection(norm2, rand2, population)
+
+            enfant = croisssement(parent1, parent2)
+            enfant = mutation(enfant)
+            nouvelle_population.append(enfant)
+
+        population = nouvelle_population
+
+    print("❌ Aucune solution trouvée après", max_generation, "générations.")
+    return None
+
+# 📌 Lancement
 if __name__ == "__main__":
-    parent1,parent2 = executer_selection()
-    enfant = croisssement(parent1,parent2)
-    print("Enfant final :", enfant)
+    start = time.time()
+    solution = algo_genetique()
+    end = time.time()
+    
+    if solution:
+        print("Solution finale trouvée :", solution)
+    else:
+        print("Pas de solution trouvée.")
+    
+    print(f"⏱ Temps d'exécution : {end - start:.4f} secondes")
