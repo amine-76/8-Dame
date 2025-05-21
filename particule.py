@@ -68,9 +68,11 @@ if __name__ == "__main__":
         print("\n")
 
     for i in range(len(tab_particules)):
+        # Calcul du best local
         lbest = trouver_meilleur_voisin(tab_particules, fitnesses, i)
-        alea = rd.uniform(0,1)
-        for 
+        alea = rd.uniform(0, 1)
+        
+        
             
             
         
