@@ -167,7 +167,7 @@ def generer_solution_voisine(solution, index_case, possibilites):
             nouvelle_solution[index_case] = (x, y, val, nouveau_rect)
     return nouvelle_solution
 
-def recuit_simulter(cases, largeur, hauteur, temp_initiale=100.0, temp_finale=0.1, alpha=0.99, iterations_par_temp=100):
+def recuit_simulter(cases, largeur, hauteur, temp_initiale=100.0, temp_finale=0.1, alpha=0.995):
     # Prétraitement: calculer toutes les possibilités de rectangles
     possibilites = calculer_toutes_possibilites(cases, largeur, hauteur)
 
@@ -184,13 +184,14 @@ def recuit_simulter(cases, largeur, hauteur, temp_initiale=100.0, temp_finale=0.
     nb_iterations = 0
     nb_stagnation = 0
     derniere_amelioration = 0
+    Nt = 10 *len(cases)
 
     print(f"Fitness initiale: {fitness_courante}")
 
     # Boucle principale de récuit simulé
     start_time = time.time()
     while T > temp_finale and nb_stagnation < 10000:
-        for _ in range(iterations_par_temp):
+        for _ in range(Nt):
             nb_iterations += 1
 
             # Générer une solution voisine
@@ -260,8 +261,11 @@ def valider_solution(solution, largeur, hauteur):
  
 def main(): 
    nom_fichier = input("Entrez le chemin du fichier de grille selon la difficulté (Si non chemin par défaut (grids/easy/250220): ")
-   if not nom_fichier:
-      nom_fichier = "grids/easy/250220"
+   nom_fichier ="grids/"+ nom_fichier
+   print(f"Lecture du fichier : {nom_fichier}")
+   if nom_fichier == "grids/":
+      print("Aucun chemin spécifié, utilisation du chemin par défaut : grids/easy/250220")
+      nom_fichier = nom_fichier+"easy/250220"
     
    largeur, hauteur, cases = lire_grille_depuis_fichier(nom_fichier)
    print(f"Dimensions : {largeur} x {hauteur}")
